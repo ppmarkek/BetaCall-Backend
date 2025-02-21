@@ -10,7 +10,6 @@ app.use(express.json());
 
 mongoose
   .connect(process.env.MONGODB_URI, {
-    dbName: "dev",
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -20,6 +19,8 @@ mongoose
   .catch((err) => {
     console.error(err);
   });
+
+mongoose.set("debug", true);
 
 app.use("/api/users", userRoutes);
 
