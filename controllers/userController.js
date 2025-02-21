@@ -14,6 +14,15 @@ const generateRefreshToken = (userId) => {
   });
 };
 
+export const getUsers = async (_req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const createUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password, terms } = req.body;
@@ -55,7 +64,11 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const { password: passwordHash, terms: userTerms, ...userWithoutPassword } = user.toObject();
+    const {
+      password: passwordHash,
+      terms: userTerms,
+      ...userWithoutPassword
+    } = user.toObject();
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
@@ -67,5 +80,27 @@ export const loginUser = async (req, res) => {
     });
   } catch (err) {
     return res.status(400).json({ message: err.message });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken)
+      return res.status(400).json({ message: "Refresh token is required" });
+
+    jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET,
+      async (err, decoded) => {
+        if (err)
+          return res.status(403).json({ message: "Invalid refresh token" });
+
+        const newAccessToken = generateAccessToken(decoded.userId);
+        res.json({ accessToken: newAccessToken });
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
