@@ -3,6 +3,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ mongoose
   .catch((err) => console.error(err));
 
 app.use("/api/users", userRoutes);
+app.use("/auth", authRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
