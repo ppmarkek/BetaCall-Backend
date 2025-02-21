@@ -2,10 +2,11 @@
   "name": "betacall-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app.mjs",
+  "main": "app.js",
+  "type": "module",
   "scripts": {
-    "start": "node app.mjs",
-    "dev": "nodemon app.mjs"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
