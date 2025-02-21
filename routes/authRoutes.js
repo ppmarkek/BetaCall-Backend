@@ -15,19 +15,25 @@ const generateRefreshToken = (userId) => {
 };
 
 const authCallback = (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "Authentication failed" });
+  if (!req.user && req.authInfo && req.authInfo.socialData) {
+    const socialData = req.authInfo.socialData;
+    return res.json({
+      message: "Social account not registered. Redirect to registration page.",
+      socialData,
+    });
   }
+  if (req.user) {
+    const accessToken = generateAccessToken(req.user.id);
+    const refreshToken = generateRefreshToken(req.user.id);
 
-  const accessToken = generateAccessToken(req.user.id);
-  const refreshToken = generateRefreshToken(req.user.id);
-
-  res.json({
-    message: "Authentication successful",
-    user: req.user,
-    accessToken,
-    refreshToken,
-  });
+    return res.json({
+      message: "Authentication successful",
+      user: req.user,
+      accessToken,
+      refreshToken,
+    });
+  }
+  return res.status(400).json({ message: "Authentication failed" });
 };
 
 router.get(

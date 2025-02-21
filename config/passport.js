@@ -11,19 +11,32 @@ const authenticateOAuth = async (profile, provider, done) => {
   try {
     let user = await User.findOne({ [`${provider}Id`]: profile.id });
 
-    if (!user) {
-      user = new User({
-        [`${provider}Id`]: profile.id,
-        firstName: profile.name?.givenName || profile.displayName,
-        lastName: profile.name?.familyName || "",
-        email: profile.emails?.[0]?.value || "",
-        avatar: profile.photos?.[0]?.value || "",
-      });
-      await user.save();
+    if (!user && profile.emails && profile.emails.length > 0) {
+      const email = profile.emails[0].value;
+      user = await User.findOne({ email });
+      if (user) {
+        if (!user[`${provider}Id`]) {
+          user[`${provider}Id`] = profile.id;
+          await user.save();
+        }
+      }
     }
-    done(null, user);
+
+    if (user) {
+      return done(null, user);
+    }
+
+    const socialData = {
+      provider,
+      socialId: profile.id,
+      firstName: profile.name?.givenName || profile.displayName || "",
+      lastName: profile.name?.familyName || "",
+      email: profile.emails?.[0]?.value || "",
+      avatar: profile.photos?.[0]?.value || "",
+    };
+    return done(null, false, { socialData });
   } catch (err) {
-    done(err, null);
+    return done(err, null);
   }
 };
 
