@@ -89,11 +89,19 @@ export const loginUser = async (req, res) => {
 
 export const loginWithGoogleAccount = async (req, res) => {
   try {
-    const { googleId } = req.body;
+    const { googleId, email } = req.body;
+    let user = await User.findOne({ googleId });
 
-    const user = await User.findOne({ googleId });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      user = await User.findOne({ email });
+      if (user) {
+        if (!user.googleId) {
+          user.googleId = googleId;
+          await user.save();
+        }
+      } else {
+        return res.status(404).json({ message: "User not found" });
+      }
     }
 
     const {
@@ -104,6 +112,7 @@ export const loginWithGoogleAccount = async (req, res) => {
       twitterId: userTwitterId,
       ...userWithoutPassword
     } = user.toObject();
+
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
@@ -117,6 +126,7 @@ export const loginWithGoogleAccount = async (req, res) => {
     return res.status(400).json({ message: err.message });
   }
 };
+
 
 export const refreshToken = async (req, res) => {
   try {
