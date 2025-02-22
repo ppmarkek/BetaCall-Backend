@@ -25,7 +25,7 @@ export const getUsers = async (_req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, terms } = req.body;
+    const { firstName, lastName, email, password, googleId, terms } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -40,6 +40,7 @@ export const createUser = async (req, res) => {
       email,
       password,
       terms,
+      googleId,
       role: "user",
     });
     await user.save();
@@ -67,6 +68,40 @@ export const loginUser = async (req, res) => {
     const {
       password: passwordHash,
       terms: userTerms,
+      googleId: userGoogleId,
+      facebookId: userFacebookId,
+      twitterId: userTwitterId,
+      ...userWithoutPassword
+    } = user.toObject();
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+
+    res.json({
+      message: "Authentication successful",
+      user: userWithoutPassword,
+      accessToken,
+      refreshToken,
+    });
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+};
+
+export const loginWithGoogleAccount = async (req, res) => {
+  try {
+    const { googleId } = req.body;
+
+    const user = await User.findOne({ googleId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {
+      password: passwordHash,
+      terms: userTerms,
+      googleId: userGoogleId,
+      facebookId: userFacebookId,
+      twitterId: userTwitterId,
       ...userWithoutPassword
     } = user.toObject();
     const accessToken = generateAccessToken(user.id);
