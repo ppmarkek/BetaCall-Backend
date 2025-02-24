@@ -87,16 +87,16 @@ export const loginUser = async (req, res) => {
   }
 };
 
-export const loginWithGoogleAccount = async (req, res) => {
+export const loginWithAppwriteAccount = async (req, res) => {
   try {
-    const { googleId, email } = req.body;
-    let user = await User.findOne({ googleId });
+    const { appwriteId, email } = req.body;
+    let user = await User.findOne({ appwriteId });
 
     if (!user) {
       user = await User.findOne({ email });
       if (user) {
-        if (!user.googleId) {
-          user.googleId = googleId;
+        if (!user.appwriteId) {
+          user.appwriteId = appwriteId;
           await user.save();
         }
       } else {
@@ -107,9 +107,7 @@ export const loginWithGoogleAccount = async (req, res) => {
     const {
       password: passwordHash,
       terms: userTerms,
-      googleId: userGoogleId,
-      facebookId: userFacebookId,
-      twitterId: userTwitterId,
+      appwriteId: userAppwriteId,
       ...userWithoutPassword
     } = user.toObject();
 
@@ -126,7 +124,6 @@ export const loginWithGoogleAccount = async (req, res) => {
     return res.status(400).json({ message: err.message });
   }
 };
-
 
 export const refreshToken = async (req, res) => {
   try {

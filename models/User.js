@@ -18,9 +18,7 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
-    googleId: { type: String, default: null },
-    facebookId: { type: String, default: null },
-    twitterId: { type: String, default: null },
+    appwriteId: { type: String, default: null },
   },
   { timestamps: true }
 );
