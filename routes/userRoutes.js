@@ -6,6 +6,7 @@ import {
   getUsers,
   loginWithAppwriteAccount,
   verifyEmail,
+  resendVerificationEmail,
 } from "../controllers/userController.js";
 // import { isAuthenticated } from "../middlewares/authMiddleware.js";
 
@@ -18,6 +19,5 @@ router.get("/users", getUsers);
 router.post("/refresh", refreshToken);
 router.get("/verify/:token", verifyEmail);
 router.post("/resend-verification", resendVerificationEmail);
-
 
 export default router;
