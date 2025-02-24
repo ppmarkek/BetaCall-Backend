@@ -17,5 +17,7 @@ router.post("/login/appwrite", loginWithAppwriteAccount);
 router.get("/users", getUsers);
 router.post("/refresh", refreshToken);
 router.get("/verify/:token", verifyEmail);
+router.post("/resend-verification", resendVerificationEmail);
+
 
 export default router;

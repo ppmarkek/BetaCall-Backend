@@ -78,6 +78,53 @@ export const createUser = async (req, res) => {
   }
 };
 
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User with this email not found." });
+    }
+
+    if (user.verified) {
+      return res
+        .status(400)
+        .json({ message: "The account has already been verified." });
+    }
+
+    user.verificationToken = crypto.randomBytes(32).toString("hex");
+    user.verificationTokenExpires = Date.now() + 3600000;
+    await user.save();
+
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${user.verificationToken}`;
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      subject: "Resending account verification",
+      html: `
+        <p>Hello, ${user.firstName}! To confirm your account, follow this link:</p>
+        <a href="${verificationUrl}">${verificationUrl}</a>
+      `,
+    });
+
+    res.json({ message: "The letter has been resent." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
