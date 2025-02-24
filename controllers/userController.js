@@ -212,6 +212,10 @@ export const loginWithAppwriteAccount = async (req, res) => {
       }
     }
 
+    if (!user.verified) {
+      return res.status(403).json({ message: "Account not verified." });
+    }
+
     const {
       password: passwordHash,
       terms: userTerms,
