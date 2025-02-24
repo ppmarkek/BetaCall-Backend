@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 const generateAccessToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -25,7 +27,8 @@ export const getUsers = async (_req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, googleId, terms } = req.body;
+    const { firstName, lastName, email, password, appwriteId, terms } =
+      req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -34,20 +37,71 @@ export const createUser = async (req, res) => {
       });
     }
 
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenExpires = Date.now() + 3600000;
     const user = new User({
       firstName,
       lastName,
       email,
       password,
       terms,
-      googleId,
+      appwriteId,
       role: "user",
+      verificationToken,
+      verificationTokenExpires,
     });
+
     await user.save();
 
-    res.status(201).json({ message: "User created successfully", user });
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      subject: "Account verification",
+      html: `
+        <p>Hello, ${firstName}! To confirm your account, follow this link:</p>
+        <a href="${verificationUrl}">${verificationUrl}</a>
+      `,
+    });
+
+    res.status(201).json({ message: "User created, verify email sent." });
   } catch (err) {
     return res.status(400).json({ message: err.message });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "The link is invalid or expired" });
+    }
+
+    user.verified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+
+    await user.save();
+
+    res.json({ message: "Account verified successfully." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -58,6 +112,10 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.verified) {
+      return res.status(403).json({ message: "Account not verified." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
