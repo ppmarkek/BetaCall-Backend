@@ -53,7 +53,7 @@ export const createUser = async (req, res) => {
 
     await user.save();
 
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify/token/${verificationToken}?email=${email}`;
 
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -100,7 +100,7 @@ export const resendVerificationEmail = async (req, res) => {
     user.verificationTokenExpires = Date.now() + 3600000;
     await user.save();
 
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${user.verificationToken}`;
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify/token/${user.verificationToken}?email=${email}`;
 
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -200,6 +200,9 @@ export const loginWithAppwriteAccount = async (req, res) => {
     if (!user) {
       user = await User.findOne({ email });
       if (user) {
+        if (!user.verified) {
+          return res.status(403).json({ message: "Account not verified." });
+        }
         if (!user.appwriteId) {
           user.appwriteId = appwriteId;
           await user.save();
