@@ -93,7 +93,7 @@ export const resendVerificationEmail = async (req, res) => {
     if (user.verified) {
       return res
         .status(400)
-        .json({ message: "The account has already been verified." });
+        .json({ message: "The account has already been verified" });
     }
 
     user.verificationToken = crypto.randomBytes(32).toString("hex");
@@ -146,7 +146,7 @@ export const verifyEmail = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Account verified successfully." });
+    res.json({ message: "Account verified successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
