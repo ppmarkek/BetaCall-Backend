@@ -22,8 +22,8 @@ router.post("/login/appwrite", loginWithAppwriteAccount);
 router.post("/refresh", refreshToken);
 router.post("/resend-verification", resendVerificationEmail);
 router.post("/reset-password", isAuthenticated, resetPassword);
-router.post("/request-reser-password", requestResetPassword);
-router.post("/request-reser-password/:token", tokenResetPassword);
+router.post("/request-reset-password", requestResetPassword);
+router.post("/request-reset-password/:token", tokenResetPassword);
 
 //get
 router.get("/users", getUsers);
