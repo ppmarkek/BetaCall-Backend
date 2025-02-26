@@ -90,12 +90,6 @@ export const resendVerificationEmail = async (req, res) => {
         .json({ message: "User with this email not found." });
     }
 
-    if (user.verified) {
-      return res
-        .status(400)
-        .json({ message: "The account has already been verified" });
-    }
-
     user.verificationToken = crypto.randomBytes(32).toString("hex");
     user.verificationTokenExpires = Date.now() + 3600000;
     await user.save();
@@ -349,12 +343,12 @@ export const tokenResetPassword = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
-        message: "Invalid or expired password reset token.",
+        message: "Invalid or expired password reset token",
       });
     }
 
     if (!user.verified) {
-      return res.status(400).json({ message: "Account is not verified." });
+      return res.status(400).json({ message: "Account is not verified" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -365,7 +359,7 @@ export const tokenResetPassword = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Password updated successfully." });
+    res.json({ message: "Password updated successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
