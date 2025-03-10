@@ -21,6 +21,7 @@ mongoose
   .catch((err) => console.error(err));
 
 app.use("/api/users", userRoutes);
+app.use("/api/messages", messageRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
