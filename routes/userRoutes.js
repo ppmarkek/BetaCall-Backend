@@ -31,6 +31,6 @@ router.post("/contacts", addContact);
 //get
 router.get("/users", getUsers);
 router.get("/verify/:token", verifyEmail);
-router.get("/contacts", contactsUser);
+router.get("/contacts/:userId", contactsUser);
 
 export default router;
