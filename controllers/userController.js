@@ -383,6 +383,13 @@ export const addContact = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const existingContact = existingUser.contacts.find(
+      (contact) => contact.id === id
+    );
+    if (existingContact) {
+      return res.status(409).json({ message: "This contact already exists" });
+    }
+
     const newContact = {
       id,
       contactEmail,
