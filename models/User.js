@@ -18,6 +18,17 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    contacts: [
+      {
+        id: String,
+        contactEmail: String,
+        firstName: String,
+        lastName: String,
+        jobName: String,
+        phoneNumber: String,
+        contactsGroup: String,
+      },
+    ],
     appwriteId: { type: String, default: null },
     verified: { type: Boolean, default: false },
     verificationToken: String,

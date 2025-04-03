@@ -364,3 +364,63 @@ export const tokenResetPassword = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const addContact = async (req, res) => {
+  try {
+    const {
+      userId,
+      id,
+      contactEmail,
+      firstName,
+      lastName,
+      jobName,
+      phoneNumber,
+      contactsGroup,
+    } = req.body;
+
+    const existingUser = await User.findOne({ _id: userId });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newContact = {
+      id,
+      contactEmail,
+      firstName,
+      lastName,
+      jobName,
+      phoneNumber,
+      contactsGroup,
+    };
+
+    existingUser.contacts.push(newContact);
+    await existingUser.save();
+
+    res.status(201).json({
+      message: "Contact added successfully",
+      contact: newContact,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+export const contactsUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    res.json(user.contacts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};

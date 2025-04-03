@@ -10,6 +10,8 @@ import {
   resetPassword,
   requestResetPassword,
   tokenResetPassword,
+  addContact,
+  contactsUser,
 } from "../controllers/userController.js";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 
@@ -24,9 +26,11 @@ router.post("/resend-verification", resendVerificationEmail);
 router.post("/reset-password", isAuthenticated, resetPassword);
 router.post("/request-reset-password", requestResetPassword);
 router.post("/request-reset-password/:token", tokenResetPassword);
+router.post("/contacts", addContact);
 
 //get
 router.get("/users", getUsers);
 router.get("/verify/:token", verifyEmail);
+router.get("/contacts", contactsUser);
 
 export default router;
